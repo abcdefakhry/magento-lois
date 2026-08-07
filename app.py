@@ -5,9 +5,33 @@ import pandas as pd
 import re
 import time
 import io
+import base64
+import urllib.parse
 
 # Konfigurasi Tampilan
 st.set_page_config(page_title="Magento Lois to CSV/Excel", page_icon="logolois.png", layout="centered")
+
+# =========================================================
+# FUNGSI BANTUAN: ENCODE FILTER TANGGAL KHUSUS MAGENTO 1
+# =========================================================
+def build_magento_url(base_url, from_dt, to_dt):
+    """
+    Magento 1 menyimpan filter grid dalam parameter 'filter' berupa string Base64.
+    Fungsi ini menyusun string tersebut agar Magento membaca filter tanggal dengan presisi.
+    """
+    if not from_dt or not to_dt:
+        return base_url
+
+    # Format internal array filter Magento
+    raw_filter = f"created_at[from]={urllib.parse.quote(from_dt)}&created_at[to]={urllib.parse.quote(to_dt)}"
+    # Encode ke Base64
+    b64_filter = base64.b64encode(raw_filter.encode('utf-8')).decode('utf-8')
+
+    # Bersihkan URL dasar jika sudah ada query lama
+    clean_url = base_url.split('/filter/')[0].rstrip('/')
+
+    # Gabungkan kembali URL dengan filter token Magento
+    return f"{clean_url}/filter/{b64_filter}/"
 
 # =========================================================
 # KONTEN TAMPILAN
@@ -31,12 +55,12 @@ col1, col2 = st.columns(2)
 with col1:
     from_date = st.text_input(
         "Dari Tanggal (MM/DD/YYYY):",
-        placeholder="Contoh: 01/01/2026"
+        placeholder="Contoh: 08/05/2026"
     )
 with col2:
     to_date = st.text_input(
         "Sampai Tanggal (MM/DD/YYYY):",
-        placeholder="Contoh: 08/05/2026"
+        placeholder="Contoh: 08/06/2026"
     )
 
 # Input Nama File Kustom & Format
@@ -74,13 +98,20 @@ if start_btn:
         try:
             status_box.write("Menghubungkan ke server Magento...")
 
-            # Request Pertama
-            params = {'limit': 200, 'p': 1}
-            if from_date.strip() and to_date.strip():
-                params['created_at[from]'] = from_date.strip()
-                params['created_at[to]'] = to_date.strip()
+            # Rakit URL dengan Filter Base64 Magento
+            f_from = from_date.strip()
+            f_to = to_date.strip()
+            target_filtered_url = build_magento_url(url_target.strip(), f_from, f_to)
 
-            res = session.get(url_target.strip(), params=params, timeout=25)
+            # Request Pertama dengan Limit 200
+            params = {'limit': 200, 'p': 1}
+
+            # Tambahkan fallback query string
+            if f_from and f_to:
+                params['created_at[from]'] = f_from
+                params['created_at[to]'] = f_to
+
+            res = session.get(target_filtered_url, params=params, timeout=25)
 
             if res.status_code != 200:
                 st.error(f"Gagal mengakses web. HTTP Status: {res.status_code}. Pastikan Cookie 'admin' masih aktif/belum expired.")
@@ -98,11 +129,11 @@ if start_btn:
                     status_box.write(f"[{p_num}/{total_pages}] Memproses Halaman {p_num}...")
 
                     p_params = {'limit': 200, 'p': p_num}
-                    if from_date.strip() and to_date.strip():
-                        p_params['created_at[from]'] = from_date.strip()
-                        p_params['created_at[to]'] = to_date.strip()
+                    if f_from and f_to:
+                        p_params['created_at[from]'] = f_from
+                        p_params['created_at[to]'] = f_to
 
-                    p_res = session.get(url_target.strip(), params=p_params, timeout=25)
+                    p_res = session.get(target_filtered_url, params=p_params, timeout=25)
                     p_soup = BeautifulSoup(p_res.text, 'html.parser')
                     rows = p_soup.select('table tbody tr')
 
