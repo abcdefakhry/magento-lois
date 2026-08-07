@@ -85,6 +85,29 @@ st.markdown("""
     div.stProgress > div > div > div > div {
         background-color: #FFC107 !important;
     }
+
+    /* Kustomisasi Radio Button (Format File Output): Background Putih, Radio Kuning */
+    div[aria-label="Format File Output:"] {
+        background-color: #FFFFFF !important;
+        padding: 8px !important;
+        border-radius: 6px !important;
+    }
+    div[data-baseweb="radio"] {
+        background-color: #FFFFFF !important;
+        color: #000000 !important;
+    }
+    div[data-baseweb="radio"] label {
+        color: #000000 !important;
+    }
+    /* Lingkaran Radio Button saat Dipilih -> Warna Kuning */
+    div[data-baseweb="radio"] input:checked + div {
+        border-color: #FFC107 !important;
+        background-color: #FFC107 !important;
+    }
+    div[data-baseweb="radio"] div {
+        border-color: #CCCCCC !important;
+        background-color: #FFFFFF !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
