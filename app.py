@@ -71,8 +71,9 @@ if start_btn:
             if f_from and f_to:
                 status_box.write("Menerapkan filter tanggal ke URL Magento...")
                 filter_str = f"created_at[from]={f_from}&created_at[to]={f_to}"
-                # Gunakan base64 encoding standar Magento
+                # Gunakan base64 encoding standar Magento (strtr(base64_encode($url), '+/=', '-_,'))
                 filter_b64 = base64.b64encode(filter_str.encode('utf-8')).decode('utf-8')
+                filter_b64 = filter_b64.replace('+', '-').replace('/', '_').replace('=', ',')
                 clean_url = clean_url + f"filter/{filter_b64}/"
 
             # 2. BUKA HALAMAN DENGAN LIMIT 200 PER PAGE
