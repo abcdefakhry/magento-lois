@@ -14,27 +14,39 @@ st.write("Aplikasi online untuk mengunduh data Reward Point Magento secara otoma
 
 st.divider()
 
-# Form Input
+# Form Input dengan Placeholder (Abu-abu pudar)
 url_target = st.text_input(
     "URL Target Magento Grid:",
-    value="https://loisjeans.id/jalanbelakang/lac/transaction/index/key/4799b3ff67637bb4a1bc35cdfbb70f9a729dff1cb21e3bf58181092933f4eccd/"
+    placeholder="Contoh: https://loisjeans.id/jalanbelakang/lac/transaction/index/key/..."
 )
-admin_cookie = st.text_input("Value Admin Cookie ('admin'):", value="r9ed7mjavu8pij1f6s5umjk193")
+admin_cookie = st.text_input(
+    "Value Admin Cookie ('admin'):",
+    placeholder="Contoh: r9ed7mjavu8pij1f6s5umjk193"
+)
 
 col1, col2 = st.columns(2)
 with col1:
-    from_date = st.text_input("Dari Tanggal (MM/DD/YYYY):", value="01/01/2026")
+    from_date = st.text_input(
+        "Dari Tanggal (MM/DD/YYYY):",
+        placeholder="Contoh: 01/01/2026"
+    )
 with col2:
-    to_date = st.text_input("Sampai Tanggal (MM/DD/YYYY):", value="08/05/2026")
+    to_date = st.text_input(
+        "Sampai Tanggal (MM/DD/YYYY):",
+        placeholder="Contoh: 08/05/2026"
+    )
 
 # Input Nama File Kustom & Format
-custom_file_name = st.text_input("Nama File Simpan (tanpa ekstensi):", value="reward_points_filtered")
+custom_file_name = st.text_input(
+    "Nama File Simpan (tanpa ekstensi):",
+    placeholder="Contoh: reward_points_filtered"
+)
 output_format = st.radio("Format File Output:", ["Excel (.xlsx)", "CSV (.csv)"], horizontal=True)
 
 start_btn = st.button("MULAI UNDUH DATA", type="primary", use_container_width=True)
 
 if start_btn:
-    if not url_target or not admin_cookie:
+    if not url_target.strip() or not admin_cookie.strip():
         st.error("Mohon lengkapi URL Target dan Cookie Admin!")
     elif not custom_file_name.strip():
         st.error("Mohon isi nama file yang diinginkan!")
@@ -43,7 +55,7 @@ if start_btn:
 
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Cookie": f"admin={admin_cookie}"
+            "Cookie": f"admin={admin_cookie.strip()}"
         }
 
         session = requests.Session()
@@ -61,11 +73,11 @@ if start_btn:
 
             # Request Pertama
             params = {'limit': 200, 'p': 1}
-            if from_date and to_date:
-                params['created_at[from]'] = from_date
-                params['created_at[to]'] = to_date
+            if from_date.strip() and to_date.strip():
+                params['created_at[from]'] = from_date.strip()
+                params['created_at[to]'] = to_date.strip()
 
-            res = session.get(url_target, params=params, timeout=25)
+            res = session.get(url_target.strip(), params=params, timeout=25)
 
             if res.status_code != 200:
                 st.error(f"Gagal mengakses web. HTTP Status: {res.status_code}. Pastikan Cookie 'admin' masih aktif/belum expired.")
@@ -83,11 +95,11 @@ if start_btn:
                     status_box.write(f"[{p_num}/{total_pages}] Memproses Halaman {p_num}...")
 
                     p_params = {'limit': 200, 'p': p_num}
-                    if from_date and to_date:
-                        p_params['created_at[from]'] = from_date
-                        p_params['created_at[to]'] = to_date
+                    if from_date.strip() and to_date.strip():
+                        p_params['created_at[from]'] = from_date.strip()
+                        p_params['created_at[to]'] = to_date.strip()
 
-                    p_res = session.get(url_target, params=p_params, timeout=25)
+                    p_res = session.get(url_target.strip(), params=p_params, timeout=25)
                     p_soup = BeautifulSoup(p_res.text, 'html.parser')
                     rows = p_soup.select('table tbody tr')
 
