@@ -7,10 +7,60 @@ import time
 import io
 
 # Konfigurasi Tampilan
-st.set_page_config(page_title="Magento Reward Point Scraper", page_icon="📦", layout="centered")
+st.set_page_config(page_title="Magento Lois to CSV/Excel", page_icon="logolois.png", layout="centered")
 
-st.title("Lois Magento To CSV/Excel")
-st.write("Aplikasi online untuk mengunduh data Reward Point Magento secara otomatis ke Excel/CSV.")
+# =========================================================
+# STYLING KUSTOM: Latar Belakang Putih & Aksen Kuning
+# =========================================================
+st.markdown("""
+    <style>
+    /* Latar Belakang Aplikasi & Sidebar Utama */
+    .stApp {
+        background-color: #FFFFFF !important;
+        color: #212529 !important;
+    }
+
+    /* Tombol Utama (Primary Button) -> Warna Kuning */
+    div.stButton > button[kind="primary"] {
+        background-color: #FFC107 !important;
+        color: #000000 !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    div.stButton > button[kind="primary"]:hover {
+        background-color: #E0A800 !important;
+        color: #000000 !important;
+    }
+
+    /* Tombol Download -> Warna Kuning */
+    div.stDownloadButton > button {
+        background-color: #FFC107 !important;
+        color: #000000 !important;
+        border: none !important;
+        font-weight: bold !important;
+    }
+    div.stDownloadButton > button:hover {
+        background-color: #E0A800 !important;
+        color: #000000 !important;
+    }
+
+    /* Aksen Border Input saat Fokus (Kuning) */
+    div[data-baseweb="input"]:focus-within {
+        border-color: #FFC107 !important;
+    }
+
+    /* Progress Bar Aksen Kuning */
+    div.stProgress > div > div > div > div {
+        background-color: #FFC107 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# =========================================================
+# KONTEN TAMPILAN
+# =========================================================
+st.title("Magento Lois to CSV/Excel")
+st.write("Website online untuk mengunduh data Magento Lois secara otomatis ke Excel/CSV.")
 
 st.divider()
 
@@ -39,7 +89,7 @@ with col2:
 # Input Nama File Kustom & Format
 custom_file_name = st.text_input(
     "Nama File Simpan (tanpa ekstensi):",
-    placeholder="Contoh: magento_lois_2026"
+    placeholder="Contoh: reward_points_filtered"
 )
 output_format = st.radio("Format File Output:", ["Excel (.xlsx)", "CSV (.csv)"], horizontal=True)
 
