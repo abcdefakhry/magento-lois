@@ -27,13 +27,17 @@ with col1:
 with col2:
     to_date = st.text_input("Sampai Tanggal (MM/DD/YYYY):", value="08/05/2026")
 
+# Input Nama File Kustom & Format
+custom_file_name = st.text_input("Nama File Simpan (tanpa ekstensi):", value="reward_points_filtered")
 output_format = st.radio("Format File Output:", ["Excel (.xlsx)", "CSV (.csv)"], horizontal=True)
 
-start_btn = st.button(" MULAI UNDUH DATA", type="primary", use_container_width=True)
+start_btn = st.button("MULAI UNDUH DATA", type="primary", use_container_width=True)
 
 if start_btn:
     if not url_target or not admin_cookie:
         st.error("Mohon lengkapi URL Target dan Cookie Admin!")
+    elif not custom_file_name.strip():
+        st.error("Mohon isi nama file yang diinginkan!")
     else:
         status_box = st.status("Sedang memproses scraping data...", expanded=True)
 
@@ -53,7 +57,7 @@ if start_btn:
         ]
 
         try:
-            status_box.write("🌐 Menghubungkan ke server Magento...")
+            status_box.write("Menghubungkan ke server Magento...")
 
             # Request Pertama
             params = {'limit': 200, 'p': 1}
@@ -72,11 +76,11 @@ if start_btn:
                 match = re.search(r'of\s+(\d+)', page_text)
                 total_pages = int(match.group(1)) if match else 1
 
-                status_box.write(f"📌 Total Halaman Terdeteksi: {total_pages}")
+                status_box.write(f"Total Halaman Terdeteksi: {total_pages}")
                 progress_bar = st.progress(0)
 
                 for p_num in range(1, total_pages + 1):
-                    status_box.write(f"⏳ [{p_num}/{total_pages}] Memproses Halaman {p_num}...")
+                    status_box.write(f"[{p_num}/{total_pages}] Memproses Halaman {p_num}...")
 
                     p_params = {'limit': 200, 'p': p_num}
                     if from_date and to_date:
@@ -111,26 +115,32 @@ if start_btn:
 
                     df = pd.DataFrame(all_records)
 
-                    # Download Trigger
+                    # Bersihkan nama file dari karakter ilegal/ekstensi manual
+                    clean_filename = re.sub(r'[\\/*?:"<>|]', "", custom_file_name.strip())
+                    clean_filename = re.sub(r'\.(xlsx|csv)$', '', clean_filename, flags=re.IGNORECASE)
+
+                    # Download Trigger dengan Nama Custom
                     if output_format == "Excel (.xlsx)":
                         buffer = io.BytesIO()
                         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                             df.to_excel(writer, index=False)
 
+                        final_filename = f"{clean_filename}.xlsx"
                         st.download_button(
-                            label="DOWNLOAD FILE EXCEL (.xlsx)",
+                            label=f"DOWNLOAD FILE EXCEL ({final_filename})",
                             data=buffer.getvalue(),
-                            file_name="reward_points_filtered.xlsx",
+                            file_name=final_filename,
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                             type="primary",
                             use_container_width=True
                         )
                     else:
                         csv_data = df.to_csv(index=False, encoding='utf-8-sig')
+                        final_filename = f"{clean_filename}.csv"
                         st.download_button(
-                            label="DOWNLOAD FILE CSV (.csv)",
+                            label=f"DOWNLOAD FILE CSV ({final_filename})",
                             data=csv_data,
-                            file_name="reward_points_filtered.csv",
+                            file_name=final_filename,
                             mime="text/csv",
                             type="primary",
                             use_container_width=True
