@@ -57,25 +57,23 @@ if start_btn:
             "Actual Point Amount", "Remark", "Expire At"
         ]
 
+        import base64
+
         try:
             status_box.write("Menghubungkan ke server Magento...")
 
             # Clean URL (Hilangkan part filter jika ada)
             clean_url = url_target.strip().split('/filter/')[0].rstrip('/') + '/'
 
-            # 1. KIRIM POST FILTER KE MAGENTO (SIMULASI TOMBOL SEARCH)
             f_from = from_date.strip()
             f_to = to_date.strip()
 
             if f_from and f_to:
-                status_box.write("Menerapkan filter tanggal ke session Magento...")
-                post_payload = {
-                    'created_at[from]': f_from,
-                    'created_at[to]': f_to,
-                    'isAjax': 'true'
-                }
-                # Kirim request POST untuk mengunci filter di session Magento
-                session.post(clean_url, data=post_payload, timeout=20)
+                status_box.write("Menerapkan filter tanggal ke URL Magento...")
+                filter_str = f"created_at[from]={f_from}&created_at[to]={f_to}"
+                # Gunakan base64 encoding standar Magento
+                filter_b64 = base64.b64encode(filter_str.encode('utf-8')).decode('utf-8')
+                clean_url = clean_url + f"filter/{filter_b64}/"
 
             # 2. BUKA HALAMAN DENGAN LIMIT 200 PER PAGE
             res = session.get(clean_url, params={'limit': 200, 'p': 1}, timeout=25)
