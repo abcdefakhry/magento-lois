@@ -39,7 +39,7 @@ with col2:
 # Input Nama File Kustom & Format
 custom_file_name = st.text_input(
     "Nama File Simpan (tanpa ekstensi):",
-    placeholder="Contoh: reward_points_filtered"
+    placeholder="Contoh: magento_lois_2026"
 )
 output_format = st.radio("Format File Output:", ["Excel (.xlsx)", "CSV (.csv)"], horizontal=True)
 
