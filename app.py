@@ -23,15 +23,28 @@ st.markdown("""
         background-color: #FFFFFF !important;
     }
 
-    /* Style khusus untuk Text Input agar background & font jelas */
-    div[data-baseweb="input"] input {
-        color: #000000 !important;
-        background-color: #FFFFFF !important;
+    /* Style wadah Text Input (Off-white / Abu-abu sangat muda dengan border halus) */
+    div[data-baseweb="input"], div[data-baseweb="base-input"] {
+        background-color: #F8F9FA !important;
+        border: 1px solid #CED4DA !important;
+        border-radius: 6px !important;
     }
 
-    /* Placeholder Text Input agar tetap terbaca tapi sedikit redup */
+    /* Input text style */
+    div[data-baseweb="input"] input {
+        color: #000000 !important;
+        background-color: transparent !important;
+    }
+
+    /* Placeholder Text Input */
     div[data-baseweb="input"] input::placeholder {
-        color: #6c757d !important;
+        color: #6C757D !important;
+    }
+
+    /* Border saat input difokuskan (Aksen Kuning) */
+    div[data-baseweb="input"]:focus-within {
+        border-color: #FFC107 !important;
+        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25) !important;
     }
 
     /* Tombol Utama (Primary Button) -> Warna Kuning */
@@ -56,11 +69,6 @@ st.markdown("""
     div.stDownloadButton > button:hover {
         background-color: #E0A800 !important;
         color: #000000 !important;
-    }
-
-    /* Aksen Border Input saat Fokus (Kuning) */
-    div[data-baseweb="input"]:focus-within {
-        border-color: #FFC107 !important;
     }
 
     /* Progress Bar Aksen Kuning */
