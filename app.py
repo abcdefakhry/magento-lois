@@ -5,36 +5,10 @@ import pandas as pd
 import re
 import time
 import io
-import base64
-import urllib.parse
 
 # Konfigurasi Tampilan
 st.set_page_config(page_title="Magento Lois to CSV/Excel", page_icon="logolois.png", layout="centered")
 
-# =========================================================
-# FUNGSI ENCODE FILTER KHUSUS MAGENTO 1 (URL-SAFE BASE64)
-# =========================================================
-def encode_magento_filter(from_date, to_date):
-    """
-    Mengubah tanggal menjadi token filter Base64 yang valid & URL-safe untuk Magento Admin Grid
-    """
-    if not from_date or not to_date:
-        return ""
-
-    # Query string baku internal Magento Grid
-    raw_query = f"created_at[from]={urllib.parse.quote(from_date)}&created_at[to]={urllib.parse.quote(to_date)}"
-
-    # Encode ke Base64 biasa
-    b64_bytes = base64.b64encode(raw_query.encode('utf-8'))
-    b64_str = b64_bytes.decode('utf-8')
-
-    # Konversi ke Magento URL-Safe Base64 Format
-    magento_b64 = b64_str.replace('+', '-').replace('/', '_').replace('=', ',')
-    return magento_b64
-
-# =========================================================
-# KONTEN TAMPILAN
-# =========================================================
 st.title("Magento Lois to CSV/Excel")
 st.write("Website online untuk mengunduh data Magento Lois secara otomatis ke Excel/CSV.")
 
@@ -86,24 +60,28 @@ if start_btn:
         try:
             status_box.write("Menghubungkan ke server Magento...")
 
-            # 1. Bersihkan URL Target dari filter lama
-            base_url = url_target.strip().split('/filter/')[0].rstrip('/') + '/'
+            # Clean URL (Hilangkan part filter jika ada)
+            clean_url = url_target.strip().split('/filter/')[0].rstrip('/') + '/'
 
+            # 1. KIRIM POST FILTER KE MAGENTO (SIMULASI TOMBOL SEARCH)
             f_from = from_date.strip()
             f_to = to_date.strip()
 
-            # 2. Buat URL dengan Token Filter Magento
             if f_from and f_to:
-                filter_token = encode_magento_filter(f_from, f_to)
-                request_url = f"{base_url}filter/{filter_token}/"
-            else:
-                request_url = base_url
+                status_box.write("Menerapkan filter tanggal ke session Magento...")
+                post_payload = {
+                    'created_at[from]': f_from,
+                    'created_at[to]': f_to,
+                    'isAjax': 'true'
+                }
+                # Kirim request POST untuk mengunci filter di session Magento
+                session.post(clean_url, data=post_payload, timeout=20)
 
-            # Request Pertama dengan limit 200
-            res = session.get(request_url, params={'limit': 200, 'p': 1}, timeout=25)
+            # 2. BUKA HALAMAN DENGAN LIMIT 200 PER PAGE
+            res = session.get(clean_url, params={'limit': 200, 'p': 1}, timeout=25)
 
             if res.status_code != 200:
-                st.error(f"Gagal mengakses web. HTTP Status: {res.status_code}. Pastikan Cookie 'admin' masih aktif.")
+                st.error(f"Gagal mengakses web. HTTP Status: {res.status_code}. Pastikan Cookie 'admin' masih aktif/belum expired.")
                 status_box.update(label="Proses Gagal", state="error")
             else:
                 soup = BeautifulSoup(res.text, 'html.parser')
@@ -117,7 +95,7 @@ if start_btn:
                 for p_num in range(1, total_pages + 1):
                     status_box.write(f"[{p_num}/{total_pages}] Memproses Halaman {p_num}...")
 
-                    p_res = session.get(request_url, params={'limit': 200, 'p': p_num}, timeout=25)
+                    p_res = session.get(clean_url, params={'limit': 200, 'p': p_num}, timeout=25)
                     p_soup = BeautifulSoup(p_res.text, 'html.parser')
                     rows = p_soup.select('table tbody tr')
 
