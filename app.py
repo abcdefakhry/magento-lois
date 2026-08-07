@@ -9,7 +9,7 @@ import io
 # Konfigurasi Tampilan
 st.set_page_config(page_title="Magento Reward Point Scraper", page_icon="📦", layout="centered")
 
-st.title("📦 Magento Grid Scraper Tool")
+st.title("Lois Magento To CSV/Excel")
 st.write("Aplikasi online untuk mengunduh data Reward Point Magento secara otomatis ke Excel/CSV.")
 
 st.divider()
@@ -29,7 +29,7 @@ with col2:
 
 output_format = st.radio("Format File Output:", ["Excel (.xlsx)", "CSV (.csv)"], horizontal=True)
 
-start_btn = st.button("🚀 MULAI UNDUH DATA", type="primary", use_container_width=True)
+start_btn = st.button(" MULAI UNDUH DATA", type="primary", use_container_width=True)
 
 if start_btn:
     if not url_target or not admin_cookie:
@@ -106,7 +106,7 @@ if start_btn:
                     time.sleep(0.3)
 
                 if all_records:
-                    status_box.update(label="🎉 Scraping Selesai Secara Sempurna!", state="complete")
+                    status_box.update(label="Scraping Selesai Secara Sempurna!", state="complete")
                     st.success(f"Berhasil menarik total {len(all_records)} baris data!")
 
                     df = pd.DataFrame(all_records)
@@ -118,7 +118,7 @@ if start_btn:
                             df.to_excel(writer, index=False)
 
                         st.download_button(
-                            label="📥 DOWNLOAD FILE EXCEL (.xlsx)",
+                            label="DOWNLOAD FILE EXCEL (.xlsx)",
                             data=buffer.getvalue(),
                             file_name="reward_points_filtered.xlsx",
                             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -128,7 +128,7 @@ if start_btn:
                     else:
                         csv_data = df.to_csv(index=False, encoding='utf-8-sig')
                         st.download_button(
-                            label="📥 DOWNLOAD FILE CSV (.csv)",
+                            label="DOWNLOAD FILE CSV (.csv)",
                             data=csv_data,
                             file_name="reward_points_filtered.csv",
                             mime="text/csv",
