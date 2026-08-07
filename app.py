@@ -5,6 +5,7 @@ import pandas as pd
 import re
 import time
 import io
+from datetime import datetime
 
 # Konfigurasi Tampilan
 st.set_page_config(page_title="Magento Lois to CSV/Excel", page_icon="logolois.png", layout="centered")
@@ -34,6 +35,32 @@ output_format = st.radio("Format File Output:", ["Excel (.xlsx)", "CSV (.csv)"],
 
 start_btn = st.button("MULAI UNDUH DATA", type="primary", use_container_width=True)
 
+def parse_date(date_str):
+    if not date_str:
+        return None
+    date_str = date_str.strip()
+    formats = [
+        "%m/%d/%Y",
+        "%m/%d/%Y %H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d",
+        "%b %d, %Y, %I:%M:%S %p",
+        "%d/%m/%Y",
+        "%d/%m/%Y %H:%M:%S",
+    ]
+    for fmt in formats:
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            pass
+    try:
+        dt = pd.to_datetime(date_str)
+        if pd.notna(dt):
+            return dt.to_pydatetime()
+    except Exception:
+        pass
+    return None
+
 if start_btn:
     if not url_target.strip() or not admin_cookie.strip():
         st.error("Mohon lengkapi URL Target dan Cookie Admin!")
@@ -57,26 +84,18 @@ if start_btn:
             "Actual Point Amount", "Remark", "Expire At"
         ]
 
-        import base64
+        # Parse filter dates
+        start_dt = parse_date(from_date.strip()) if from_date.strip() else None
+        end_dt = parse_date(to_date.strip()) if to_date.strip() else None
+        if end_dt:
+            end_dt = end_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
 
         try:
             status_box.write("Menghubungkan ke server Magento...")
 
-            # Clean URL (Hilangkan part filter jika ada)
-            clean_url = url_target.strip().split('/filter/')[0].rstrip('/') + '/'
+            # Gunakan URL asli tanpa mengubah path URL agar tidak terjadi error 500
+            clean_url = url_target.strip()
 
-            f_from = from_date.strip()
-            f_to = to_date.strip()
-
-            if f_from and f_to:
-                status_box.write("Menerapkan filter tanggal ke URL Magento...")
-                filter_str = f"created_at[from]={f_from}&created_at[to]={f_to}"
-                # Gunakan base64 encoding standar Magento (strtr(base64_encode($url), '+/=', '-_,'))
-                filter_b64 = base64.b64encode(filter_str.encode('utf-8')).decode('utf-8')
-                filter_b64 = filter_b64.replace('+', '-').replace('/', '_').replace('=', ',')
-                clean_url = clean_url + f"filter/{filter_b64}/"
-
-            # 2. BUKA HALAMAN DENGAN LIMIT 200 PER PAGE
             res = session.get(clean_url, params={'limit': 200, 'p': 1}, timeout=25)
 
             if res.status_code != 200:
@@ -91,7 +110,13 @@ if start_btn:
                 status_box.write(f"Total Halaman Terdeteksi: {total_pages}")
                 progress_bar = st.progress(0)
 
+                stop_scraping = False
+
                 for p_num in range(1, total_pages + 1):
+                    if stop_scraping:
+                        status_box.write(f"Menghentikan scraping di halaman {p_num-1} karena data selanjutnya sudah di luar rentang tanggal.")
+                        break
+
                     status_box.write(f"[{p_num}/{total_pages}] Memproses Halaman {p_num}...")
 
                     p_res = session.get(clean_url, params={'limit': 200, 'p': p_num}, timeout=25)
@@ -99,6 +124,9 @@ if start_btn:
                     rows = p_soup.select('table tbody tr')
 
                     count = 0
+                    parsed_rows_in_page = 0
+                    older_rows_in_page = 0
+
                     for row in rows:
                         if 'headings' in row.get('class', []) or row.find('input') or row.find('select'):
                             continue
@@ -110,15 +138,34 @@ if start_btn:
                                 col_name = headers_list[idx] if idx < len(headers_list) else f"Col_{idx+1}"
                                 row_data[col_name] = cell.get_text(strip=True)
 
+                            # Filter tanggal
+                            if start_dt or end_dt:
+                                created_at_val = row_data.get("Created At", "")
+                                row_dt = parse_date(created_at_val)
+
+                                if row_dt:
+                                    parsed_rows_in_page += 1
+                                    if start_dt and row_dt < start_dt:
+                                        older_rows_in_page += 1
+                                        continue
+                                    if end_dt and row_dt > end_dt:
+                                        continue
+
                             all_records.append(row_data)
                             count += 1
+
+                    # Jika semua baris pada halaman ini lebih lama dari start_dt, hentikan pencarian halaman berikutnya
+                    if start_dt and parsed_rows_in_page > 0 and older_rows_in_page == parsed_rows_in_page:
+                        stop_scraping = True
 
                     progress_bar.progress(p_num / total_pages)
                     time.sleep(0.3)
 
+                progress_bar.progress(1.0)
+
                 if all_records:
                     status_box.update(label="Scraping Selesai Secara Sempurna!", state="complete")
-                    st.success(f"Berhasil menarik total {len(all_records)} baris data!")
+                    st.success(f"Berhasil menarik total {len(all_records)} baris data sesuai rentang tanggal!")
 
                     df = pd.DataFrame(all_records)
 
@@ -151,11 +198,12 @@ if start_btn:
                             use_container_width=True
                         )
 
-                    st.subheader("Preview 50 Data Teratas:")
+                    st.subheader("Preview Data Hasil Scrape:")
                     st.dataframe(df.head(50))
 
                 else:
-                    st.warning("Tidak ada data ditemukan. Cek kembali format tanggal atau Cookie Admin.")
+                    status_box.update(label="Proses Selesai", state="complete")
+                    st.warning("Tidak ada data ditemukan dalam rentang tanggal tersebut. Cek kembali format tanggal atau Cookie Admin.")
 
         except Exception as e:
             st.error(f"Terjadi kesalahan koneksi: {str(e)}")
