@@ -14,10 +14,24 @@ st.set_page_config(page_title="Magento Lois to CSV/Excel", page_icon="logolois.p
 # =========================================================
 st.markdown("""
     <style>
-    /* Latar Belakang Aplikasi & Sidebar Utama */
+    /* Latar Belakang Aplikasi & Warna Teks Global */
+    .stApp, .stApp * {
+        color: #000000 !important;
+    }
+    
     .stApp {
         background-color: #FFFFFF !important;
-        color: #212529 !important;
+    }
+
+    /* Style khusus untuk Text Input agar background & font jelas */
+    div[data-baseweb="input"] input {
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
+    }
+
+    /* Placeholder Text Input agar tetap terbaca tapi sedikit redup */
+    div[data-baseweb="input"] input::placeholder {
+        color: #6c757d !important;
     }
 
     /* Tombol Utama (Primary Button) -> Warna Kuning */
