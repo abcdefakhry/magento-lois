@@ -23,17 +23,21 @@ st.markdown("""
         background-color: #FFFFFF !important;
     }
 
-    /* Style wadah Text Input (Off-white / Abu-abu sangat muda dengan border halus) */
-    div[data-baseweb="input"], div[data-baseweb="base-input"] {
-        background-color: #F8F9FA !important;
-        border: 1px solid #CED4DA !important;
+    /* Paksa semua latar belakang kolom/wadah pengisian menjadi Warna Putih */
+    div[data-baseweb="input"],
+    div[data-baseweb="base-input"],
+    div[data-baseweb="select"],
+    .stTextInput > div > div,
+    .stNumberInput > div > div {
+        background-color: #FFFFFF !important;
+        border: 1px solid #CCCCCC !important;
         border-radius: 6px !important;
     }
 
     /* Input text style */
     div[data-baseweb="input"] input {
         color: #000000 !important;
-        background-color: transparent !important;
+        background-color: #FFFFFF !important;
     }
 
     /* Placeholder Text Input */
@@ -42,9 +46,10 @@ st.markdown("""
     }
 
     /* Border saat input difokuskan (Aksen Kuning) */
-    div[data-baseweb="input"]:focus-within {
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="base-input"]:focus-within {
         border-color: #FFC107 !important;
-        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25) !important;
+        box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3) !important;
     }
 
     /* Tombol Utama (Primary Button) -> Warna Kuning */
