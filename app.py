@@ -20,41 +20,37 @@ st.markdown("""
         color: #000000 !important;
     }
 
-    /* Warna Teks untuk Title, Subtitle, Label, Radio, dan Markdown */
-    .stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp label, .stApp span, .stApp div {
-        color: #000000;
+    /* Warna Teks Judul & Subjudul */
+    .stApp h1, .stApp h2, .stApp h3, .stApp p {
+        color: #000000 !important;
     }
 
-    /* Paksa semua latar belakang kolom/wadah pengisian menjadi Warna Putih */
-    div[data-baseweb="input"],
-    div[data-baseweb="base-input"],
-    div[data-baseweb="select"],
-    .stTextInput > div > div,
-    .stNumberInput > div > div {
+    /* Label Input */
+    .stApp label {
+        color: #000000 !important;
+        font-weight: 500 !important;
+    }
+
+    /* Styling Wadah Text Input */
+    .stTextInput input {
+        color: #000000 !important;
+        background-color: #FFFFFF !important;
+    }
+
+    div[data-baseweb="input"] {
         background-color: #FFFFFF !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 6px !important;
     }
 
-    /* Teks yang diketik dalam Input berwarna hitam */
-    div[data-baseweb="input"] input {
-        color: #000000 !important;
-        background-color: #FFFFFF !important;
-    }
-
-    /* Placeholder Text Input -> Warna Abu-abu Pudar (Kembali seperti semula) */
-    div[data-baseweb="input"] input::placeholder,
-    input::placeholder {
-        color: #888888 !important;
-        opacity: 1 !important;
-        -webkit-text-fill-color: #888888 !important;
-    }
-
-    /* Border saat input difokuskan (Aksen Kuning) */
-    div[data-baseweb="input"]:focus-within,
-    div[data-baseweb="base-input"]:focus-within {
+    div[data-baseweb="input"]:focus-within {
         border-color: #FFC107 !important;
         box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3) !important;
+    }
+
+    /* Styling khusus Placeholder Text */
+    .stTextInput input::placeholder {
+        color: #888888 !important;
     }
 
     /* Tombol Utama (Primary Button) -> Warna Kuning */
@@ -86,27 +82,13 @@ st.markdown("""
         background-color: #FFC107 !important;
     }
 
-    /* Kustomisasi Radio Button (Format File Output): Background Putih, Radio Kuning */
-    div[aria-label="Format File Output:"] {
-        background-color: #FFFFFF !important;
-        padding: 8px !important;
-        border-radius: 6px !important;
-    }
-    div[data-baseweb="radio"] {
-        background-color: #FFFFFF !important;
-        color: #000000 !important;
-    }
+    /* Radio Button (Format File Output): Background Putih & Accent Kuning */
     div[data-baseweb="radio"] label {
         color: #000000 !important;
     }
-    /* Lingkaran Radio Button saat Dipilih -> Warna Kuning */
     div[data-baseweb="radio"] input:checked + div {
         border-color: #FFC107 !important;
         background-color: #FFC107 !important;
-    }
-    div[data-baseweb="radio"] div {
-        border-color: #CCCCCC !important;
-        background-color: #FFFFFF !important;
     }
     </style>
 """, unsafe_allow_html=True)
