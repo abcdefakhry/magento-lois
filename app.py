@@ -14,13 +14,15 @@ st.set_page_config(page_title="Magento Lois to CSV/Excel", page_icon="logolois.p
 # =========================================================
 st.markdown("""
     <style>
-    /* Latar Belakang Aplikasi & Warna Teks Global */
-    .stApp, .stApp * {
-        color: #000000 !important;
-    }
-    
+    /* Latar Belakang Utama Aplikasi */
     .stApp {
         background-color: #FFFFFF !important;
+        color: #000000 !important;
+    }
+
+    /* Warna Teks untuk Title, Subtitle, Label, Radio, dan Markdown */
+    .stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp label, .stApp span, .stApp div {
+        color: #000000;
     }
 
     /* Paksa semua latar belakang kolom/wadah pengisian menjadi Warna Putih */
@@ -34,15 +36,18 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* Input text style */
+    /* Teks yang diketik dalam Input berwarna hitam */
     div[data-baseweb="input"] input {
         color: #000000 !important;
         background-color: #FFFFFF !important;
     }
 
-    /* Placeholder Text Input */
-    div[data-baseweb="input"] input::placeholder {
-        color: #6C757D !important;
+    /* Placeholder Text Input -> Warna Abu-abu Pudar (Kembali seperti semula) */
+    div[data-baseweb="input"] input::placeholder,
+    input::placeholder {
+        color: #888888 !important;
+        opacity: 1 !important;
+        -webkit-text-fill-color: #888888 !important;
     }
 
     /* Border saat input difokuskan (Aksen Kuning) */
